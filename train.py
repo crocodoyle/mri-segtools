@@ -126,7 +126,7 @@ def batch(data_dir, subj_ids):
         label_array = to_categorical(segmentation_img, num_classes=11)
         label_array = np.reshape(label_array, ((1,) + img_shape + (11,)))
 
-        yield (img_array, label_array)
+        yield (img_array, np.asarray(label_array, dtype='int32'))
 
 
 
