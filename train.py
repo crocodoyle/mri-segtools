@@ -103,7 +103,7 @@ def unet(n_tissues):
     bn17 = BatchNormalization()(drop16)
 
     # need as many output channel as tissue classes
-    conv17 = Conv3D(n_tissues, (1, 1, 1), activation='softmax', padding='valid')(bn17)
+    conv17 = Conv3D(n_tissues, mini_conv_size, activation='softmax', padding='valid', use_bias=False)(bn17)
 
     model = Model(inputs=[inputs], outputs=[conv17])
 
