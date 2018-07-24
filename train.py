@@ -130,7 +130,7 @@ def batch(data_dir, subj_ids):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training a segmentation model for the MRBrains18 Challenge.')
-    parser.add_argument('--data-dir', action='store', default='/data1/users/adoyle/MRBrains18/', metavar='N', help='root directory for training data')
+    parser.add_argument('--data-dir', action='store', default='/data1/users/adoyle/MRBrains18/training/', metavar='N', help='root directory for training data')
     parser.add_argument('--epochs', type=int, default=20, metavar='N', help='number of epochs to train for (default: 20)')
     args = parser.parse_args()
 
