@@ -119,6 +119,8 @@ def batch(data_dir, subj_ids):
         img_array[0, :, :, :, 1] = nib.load(data_dir + subj_id + '/pre/reg_IR.nii.gz').get_data()
         img_array[0, :, :, :, 2] = nib.load(data_dir + subj_id + '/pre/reg_T1.nii.gz').get_data()
 
+        img_array = (img_array - np.min(img_array)) / (np.max(img_array) + 0.000001)
+
         segmentation_img = nib.load(data_dir + subj_id + '/segm.nii.gz').get_data()
 
         label_array = to_categorical(segmentation_img, num_classes=11)
