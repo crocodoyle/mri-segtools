@@ -145,7 +145,9 @@ if __name__ == '__main__':
 
     y = nib.load(data_dir + subjects[0] + '/segm.nii.gz').get_data().ravel()
 
-    class_weight = compute_class_weight('balanced', list(range(11)), y)
+    print('labels:', list(set(y)))
+
+    class_weight = compute_class_weight('balanced', np.unique(y), y)
 
     print('Class weight:', class_weight)
 
