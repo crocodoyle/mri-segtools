@@ -163,4 +163,4 @@ if __name__ == '__main__':
 
     model.summary()
 
-    model.fit_generator(batch(data_dir, subjects[0:-1]), len(subjects) - 1, epochs=n_epochs, validation_data=batch(data_dir, [subjects[-1]]), validation_steps=1, max_queue_size=2, workers=1, class_weight=train_class_weight)
+    model.fit_generator(batch(data_dir, subjects[0:-1]), len(subjects) - 1, epochs=n_epochs, validation_data=batch(data_dir, [subjects[-1]]), validation_steps=1, max_queue_size=2, workers=1)
