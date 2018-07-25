@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 
 from keras.layers import Input, Conv3D, BatchNormalization, GlobalAveragePooling3D, MaxPooling3D, UpSampling3D, Dropout, add, concatenate
+from keras import backend as K
 
 from keras.models import Model, load_model, save_model
 from keras.optimizers import Adam
@@ -139,6 +140,8 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=20, metavar='N', help='number of epochs to train for (default: 20)')
     args = parser.parse_args()
 
+    gpus = K.tensorflow_backend._get_available_gpus()
+    print('GPUs:', gpus)
 
     data_dir = args.data_dir
     n_epochs = args.epochs
