@@ -1,6 +1,6 @@
-import keras
-import keras.backend as K
 import numpy as np
+
+from sklearn.utils.class_weight import compute_class_weight
 
 from keras.layers import Input, Conv3D, BatchNormalization, MaxPooling3D, UpSampling3D, Dropout, add, concatenate
 
@@ -143,7 +143,15 @@ if __name__ == '__main__':
 
     subjects = ['1', '4', '5', '7', '14', '070', '148']
 
+    y = nib.load(data_dir + subjects[0] + '/segm.nii.gz').get_data().ravel()
 
+    class_weight = compute_class_weight('balanced', list(range(11)), y)
+
+    print('Class weight:', class_weight)
+
+    train_class_weight = {}
+    for i, weight in enumerate(class_weight):
+        train_class_weight[i] = weight
 
     model = unet(11)
 
@@ -153,4 +161,4 @@ if __name__ == '__main__':
 
     model.summary()
 
-    model.fit_generator(batch(data_dir, subjects[0:-1]), len(subjects) - 1, epochs=n_epochs, validation_data=batch(data_dir, [subjects[-1]]), validation_steps=1)
+    model.fit_generator(batch(data_dir, subjects[0:-1]), len(subjects) - 1, epochs=n_epochs, validation_data=batch(data_dir, [subjects[-1]]), validation_steps=1, max_queue_size=2, workers=1, class_weight=train_class_weight)
