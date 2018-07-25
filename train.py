@@ -113,20 +113,21 @@ def unet(n_tissues):
 def batch(data_dir, subj_ids):
     img_array = np.zeros((1, 240, 240, 48, 3), dtype='float32')
 
-    np.random.shuffle(subj_ids)
-    for subj_id in subj_ids:
-        img_array[0, :, :, :, 0] = nib.load(data_dir + subj_id + '/pre/FLAIR.nii.gz').get_data()
-        img_array[0, :, :, :, 1] = nib.load(data_dir + subj_id + '/pre/reg_IR.nii.gz').get_data()
-        img_array[0, :, :, :, 2] = nib.load(data_dir + subj_id + '/pre/reg_T1.nii.gz').get_data()
+    while True:
+        np.random.shuffle(subj_ids)
+            for subj_id in subj_ids:
+                img_array[0, :, :, :, 0] = nib.load(data_dir + subj_id + '/pre/FLAIR.nii.gz').get_data()
+                img_array[0, :, :, :, 1] = nib.load(data_dir + subj_id + '/pre/reg_IR.nii.gz').get_data()
+                img_array[0, :, :, :, 2] = nib.load(data_dir + subj_id + '/pre/reg_T1.nii.gz').get_data()
 
-        img_array = (img_array - np.min(img_array)) / (np.max(img_array) + 0.000001)
+                img_array = (img_array - np.min(img_array)) / (np.max(img_array) + 0.000001)
 
-        segmentation_img = nib.load(data_dir + subj_id + '/segm.nii.gz').get_data()
+                segmentation_img = nib.load(data_dir + subj_id + '/segm.nii.gz').get_data()
 
-        label_array = to_categorical(segmentation_img, num_classes=11)
-        label_array = np.reshape(label_array, ((1,) + img_shape + (11,)))
+                label_array = to_categorical(segmentation_img, num_classes=11)
+                label_array = np.reshape(label_array, ((1,) + img_shape + (11,)))
 
-        yield (img_array, np.asarray(label_array, dtype='int32'))
+                yield (img_array, np.asarray(label_array, dtype='int32'))
 
 
 
