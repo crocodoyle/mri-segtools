@@ -35,5 +35,5 @@ if __name__ == '__main__':
 
     for subj_id in subjects:
         predicted_img = predict_segmentation(data_dir + subj_id + '/pre/')
-        save_img = nib.Nifti2Image(predicted_img, affine, header=header)
+        save_img = nib.Nifti1Image(predicted_img, affine, header=header)
         nib.save(save_img, data_dir + subj_id + '_segmented.nii.gz')
