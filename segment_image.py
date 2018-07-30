@@ -29,10 +29,11 @@ if __name__ == '__main__':
     subjects = ['1', '4', '5', '7', '14', '070', '148']
 
     header = nib.load(data_dir + '1/segm.nii.gz').header
+    affine = nib.load(data_dir + '1/segm.nii.gz').get_affine()
 
     model = load_model(data_dir + 'neuroMTL_segmentation.hdf5')
 
     for subj_id in subjects:
         predicted_img = predict_segmentation(data_dir + subj_id + '/pre/')
-        save_img = nib.Nifti2Image(predicted_img, np.eye(4), header=header)
+        save_img = nib.Nifti2Image(predicted_img, affine, header=header)
         nib.save(save_img, data_dir + subj_id + '_segmented.nii.gz')
