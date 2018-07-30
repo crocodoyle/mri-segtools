@@ -16,7 +16,7 @@ def predict_segmentation(input_images_path):
 
     prediction = np.argmax(prediction_one_hot, axis=-1)
 
-    return prediction
+    return prediction[0, ...]
 
 
 if __name__ == '__main__':
