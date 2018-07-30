@@ -16,9 +16,9 @@ def predict_segmentation(input_images_path):
 
     prediction = np.argmax(prediction_one_hot, axis=-1)
 
-    save_img = nib.Nifti2Image(prediction, np.eye(4))
 
-    return save_img
+
+    return prediction
 
 
 if __name__ == '__main__':
@@ -30,8 +30,12 @@ if __name__ == '__main__':
 
     subjects = ['1', '4', '5', '7', '14', '070', '148']
 
+    header = nib.load(data_dir + '1/segm.nii.gz').header
+
     model = load_model(data_dir + 'neuroMTL_segmentation.hdf5')
 
     for subj_id in subjects:
-        save_img = predict_segmentation(data_dir + subj_id + '/pre/')
+        predicted_img = predict_segmentation(data_dir + subj_id + '/pre/')
+        save_img = nib.Nifti2Image(predicted_img, np.eye(4))
+        save_img.header = header
         nib.save(save_img, data_dir + subj_id + '_segmented.nii.gz')
