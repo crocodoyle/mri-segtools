@@ -7,6 +7,7 @@ from keras import backend as K
 
 from keras.models import Model, load_model, save_model
 from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint
 
 from keras.utils import to_categorical
 
@@ -164,8 +165,15 @@ if __name__ == '__main__':
 
     adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
 
-    model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'])
+    checkpoint = ModelCheckpoint(data_dir + 'best_segmentation_model.hdf5', monitor='val_loss', verbose=0, save_best_only=True,
+                                    save_weights_only=False, mode='auto', period=1)
+
+    model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'], callbacks=[checkpoint])
 
     model.summary()
 
     model.fit_generator(batch(data_dir, subjects[0:-1]), len(subjects) - 1, epochs=n_epochs, validation_data=batch(data_dir, [subjects[-1]]), validation_steps=1, max_queue_size=2, workers=1)
+
+    best_model = load_model(data_dir + 'best_segmentation_model.hdf5')
+
+    best_model.save(data_dir + 'neuroMTL_segmentation.hdf5')
