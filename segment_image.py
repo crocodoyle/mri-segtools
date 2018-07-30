@@ -16,8 +16,6 @@ def predict_segmentation(input_images_path):
 
     prediction = np.argmax(prediction_one_hot, axis=-1)
 
-
-
     return prediction
 
 
@@ -36,6 +34,5 @@ if __name__ == '__main__':
 
     for subj_id in subjects:
         predicted_img = predict_segmentation(data_dir + subj_id + '/pre/')
-        save_img = nib.Nifti2Image(predicted_img, np.eye(4))
-        save_img.header = header
+        save_img = nib.Nifti2Image(predicted_img, np.eye(4), header=header)
         nib.save(save_img, data_dir + subj_id + '_segmented.nii.gz')
