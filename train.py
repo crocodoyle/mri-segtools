@@ -135,7 +135,7 @@ def batch(data_dir, subj_ids):
             yield (img_array, np.asarray(label_array, dtype='int32'))
 
 
-def dice_coef(y_true, y_pred, smooth=1.0):
+def dice_coef(y_true, y_pred, smooth=10**(-5)):
     """ DICE coefficient: 2TP / (2TP + FP + FN). An additional smoothness term is added to ensure no / 0
     :param y_true: True labels.
     :type: TensorFlow/Theano tensor.
@@ -194,7 +194,7 @@ if __name__ == '__main__':
                                     save_weights_only=False, mode='auto', period=1)
 
     # model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'])
-    model.compile(optimizer=adam, loss=dice_coef_loss, metrics=[dice_coef_loss, dice_coef])
+    model.compile(optimizer=adam, loss=dice_coef_loss, metrics=[dice_coef,'accuracy'])
 
     model.summary()
 
