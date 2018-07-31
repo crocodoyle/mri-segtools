@@ -129,15 +129,40 @@ def batch(data_dir, subj_ids):
             segmentation_img = nib.load(data_dir + subj_id + '/segm.nii.gz').get_data()
 
             label_array = to_categorical(segmentation_img, num_classes=11)
+            # (1,240,240,48,11)
             label_array = np.reshape(label_array, ((1,) + img_shape + (11,)))
 
             yield (img_array, np.asarray(label_array, dtype='int32'))
 
 
+def dice_coef(y_true, y_pred, smooth=1.0):
+    """ DICE coefficient: 2TP / (2TP + FP + FN). An additional smoothness term is added to ensure no / 0
+    :param y_true: True labels.
+    :type: TensorFlow/Theano tensor.
+    :param y_pred: Predictions.
+    :type: TensorFlow/Theano tensor of the same shape as y_true.
+    :return: Scalar DICE coefficient.
+    """
+    # exclude the background and infarction class from DICE calculation
+    exclude = [9,10]
+    # y_true is (1,240,240,48,11)
+    # shape = y_true.get_shape()
+    num_classes = 11#shape[-1]
+    labels = [i for i in range(num_classes) if i not in exclude]
+    score = 0
+    for i in labels:
+        intersection = K.sum( y_true[..., i] * y_pred[..., i] )
+        score += ( 2.0 * intersection + smooth ) / ( K.sum(y_true[..., i]) + K.sum(y_pred[..., i]) + smooth )
+    return score / len(labels)
+
+
+def dice_coef_loss(y_true, y_pred):
+    return -dice_coef(y_true, y_pred)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training a segmentation model for the MRBrains18 Challenge.')
-    parser.add_argument('--data-dir', action='store', default='/data1/users/adoyle/MRBrainS18/training/', metavar='N', help='root directory for training data')
+    parser.add_argument('--data-dir', action='store', default='../training/', metavar='N', help='root directory for training data')
     parser.add_argument('--epochs', type=int, default=20, metavar='N', help='number of epochs to train for (default: 20)')
     args = parser.parse_args()
 
@@ -168,7 +193,8 @@ if __name__ == '__main__':
     checkpoint = ModelCheckpoint(data_dir + 'best_segmentation_model.hdf5', monitor='val_loss', verbose=0, save_best_only=True,
                                     save_weights_only=False, mode='auto', period=1)
 
-    model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'])
+    # model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'])
+    model.compile(optimizer=adam, loss=dice_coef_loss, metrics=[dice_coef_loss, dice_coef])
 
     model.summary()
 
