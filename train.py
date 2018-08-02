@@ -18,6 +18,7 @@ import argparse
 
 modalities = ['FLAIR', 'reg_IR', 'reg_T1']
 img_shape = (240, 240, 48)
+# class_weight = []
 
 def unet(n_tissues):
     """
@@ -149,10 +150,12 @@ def dice_coef(y_true, y_pred, smooth=10**(-5)):
     # shape = y_true.get_shape()
     num_classes = 11#shape[-1]
     labels = [i for i in range(num_classes) if i not in exclude]
+    class_weight=[1.35858028e-01,1.97656687e+00,2.59920467e+01,2.50718203e+00,1.64542046e+02,
+            2.02288920e+00,2.29974547e+01,7.86140185e+00,3.99791775e+01]
     score = 0
-    for i in labels:
-        intersection = K.sum( y_true[..., i] * y_pred[..., i] )
-        score += ( 2.0 * intersection + smooth ) / ( K.sum(y_true[..., i]) + K.sum(y_pred[..., i]) + smooth )
+    for w,l in zip(class_weight,labels):
+        intersection = K.sum( y_true[..., l] * y_pred[..., l] )
+        score += w * ( 2.0 * intersection + smooth ) / ( K.sum(y_true[..., l]) + K.sum(y_pred[..., l]) + smooth )
     return score / len(labels)
 
 
@@ -161,6 +164,7 @@ def dice_coef_loss(y_true, y_pred):
 
 
 if __name__ == '__main__':
+    # global class_weight
     parser = argparse.ArgumentParser(description='Training a segmentation model for the MRBrains18 Challenge.')
     parser.add_argument('--data-dir', action='store', default='../training/', metavar='N', help='root directory for training data')
     parser.add_argument('--epochs', type=int, default=20, metavar='N', help='number of epochs to train for (default: 20)')
