@@ -18,6 +18,8 @@ import argparse
 
 modalities = ['FLAIR', 'reg_IR', 'reg_T1']
 img_shape = (240, 240, 48)
+# exclude the background and infarction class
+num_classes = 9
 # class_weight = []
 
 def unet(n_tissues):
@@ -103,7 +105,7 @@ def unet(n_tissues):
     # bn15 = BatchNormalization()(drop15)
     conv16 = Conv3D(16, mini_conv_size, activation='relu', padding='same', use_bias=False)(drop15)
 
-    GlobalAveragePooling3D()
+    # GlobalAveragePooling3D()
     drop16 = Dropout(0.5)(conv16)
     # bn17 = BatchNormalization()(drop16)
 
@@ -116,7 +118,8 @@ def unet(n_tissues):
 
 
 def batch(data_dir, subj_ids):
-    img_array = np.zeros((1, 240, 240, 48, 3), dtype='float32')
+    nmods = len(modalities)
+    img_array = np.zeros((1, 240, 240, 48, nmods), dtype='float32')
 
     while True:
         np.random.shuffle(subj_ids)
@@ -125,13 +128,18 @@ def batch(data_dir, subj_ids):
             img_array[0, :, :, :, 1] = nib.load(data_dir + subj_id + '/pre/reg_IR.nii.gz').get_data()
             img_array[0, :, :, :, 2] = nib.load(data_dir + subj_id + '/pre/reg_T1.nii.gz').get_data()
 
-            img_array = (img_array - np.min(img_array)) / (np.max(img_array) + 0.000001)
+            # normalize img_array by modalities
+            for m in range(nmods):
+                img_array[0,:,:,:,m] = (img_array[0,:,:,:,m] - np.min(img_array[0,:,:,:,m])) / (np.max(img_array[0,:,:,:,m]) + 0.000001)
 
             segmentation_img = nib.load(data_dir + subj_id + '/segm.nii.gz').get_data()
+            # will be 9 or 10
+            num_classes_subj = len(list(set(segmentation_img.ravel())))
 
-            label_array = to_categorical(segmentation_img, num_classes=11)
-            # (1,240,240,48,11)
-            label_array = np.reshape(label_array, ((1,) + img_shape + (11,)))
+            label_array = to_categorical(segmentation_img, num_classes=num_classes_subj)
+            # (1,240,240,48,9) or (1,240,240,48,10) ... remove additional class if exists
+            label_array = label_array[...,:num_classes]
+            label_array = np.reshape(label_array, ((1,) + img_shape + (num_classes,)))
 
             yield (img_array, np.asarray(label_array, dtype='int32'))
 
@@ -148,10 +156,11 @@ def dice_coef(y_true, y_pred, smooth=10**(-5)):
     exclude = [9,10]
     # y_true is (1,240,240,48,11)
     # shape = y_true.get_shape()
-    num_classes = 11#shape[-1]
-    labels = [i for i in range(num_classes) if i not in exclude]
-    class_weight=[1.35858028e-01,1.97656687e+00,2.59920467e+01,2.50718203e+00,1.64542046e+02,
-            2.02288920e+00,2.29974547e+01,7.86140185e+00,3.99791775e+01]
+    # num_classes = 11#shape[-1]
+    labels = range(num_classes) # [i for i in range(num_classes) if i not in exclude]
+    class_weight=[1.33277636e-01,1.73610281e+00,2.86846186e+01,2.42313665e+00,1.89505171e+03,
+            2.12526369e+00,2.36024193e+01,6.79663033e+00,4.66165505e+01]
+    class_weight = [w/sum(class_weight) for w in class_weight]
     score = 0
     for w,l in zip(class_weight,labels):
         intersection = K.sum( y_true[..., l] * y_pred[..., l] )
@@ -175,14 +184,16 @@ if __name__ == '__main__':
 
     data_dir = args.data_dir
     n_epochs = args.epochs
+    # num_classes = 9
 
     subjects = ['1', '4', '5', '7', '14', '070', '148']
 
-    y = nib.load(data_dir + subjects[0] + '/segm.nii.gz').get_data().ravel()
-
-    print('labels:', list(set(y)))
-
-    class_weight = compute_class_weight('balanced', np.unique(y), y)
+    class_weight = [0]*num_classes
+    for s in range(len(subjects)):
+        y = nib.load(data_dir + subjects[s] + '/segm.nii.gz').get_data().ravel()
+        print('labels:', list(set(y)))
+        class_weight += compute_class_weight('balanced', np.unique(y), y)[:num_classes]
+    class_weight /= len(subjects)
 
     print('Class weight:', class_weight)
 
@@ -190,7 +201,7 @@ if __name__ == '__main__':
     for i, weight in enumerate(class_weight):
         train_class_weight[i] = weight
 
-    model = unet(11)
+    model = unet(num_classes)
 
     adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
 
@@ -198,7 +209,7 @@ if __name__ == '__main__':
                                     save_weights_only=False, mode='auto', period=1)
 
     # model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'])
-    model.compile(optimizer=adam, loss=dice_coef_loss, metrics=[dice_coef,'accuracy'])
+    model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=[dice_coef,'accuracy'])
 
     model.summary()
 
