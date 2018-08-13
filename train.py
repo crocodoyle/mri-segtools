@@ -20,7 +20,8 @@ modalities = ['FLAIR', 'reg_IR', 'reg_T1']
 img_shape = (240, 240, 48)
 # exclude the background and infarction class
 num_classes = 9
-# class_weight = []
+# class_weight = [0.1, 1.73, 28.68, 2.42, 1895.05, 2.12, 23.60, 6.796, 46.616]
+class_weight = [0.01, 1.73, 28.68, 2.42, 100, 2.12, 23.60, 6.796, 46.616]
 
 def unet(n_tissues):
     """
@@ -158,14 +159,14 @@ def dice_coef(y_true, y_pred, smooth=10**(-5)):
     # shape = y_true.get_shape()
     # num_classes = 11#shape[-1]
     labels = range(num_classes) # [i for i in range(num_classes) if i not in exclude]
-    class_weight=[1.33277636e-01, 1.73610281e+00, 2.86846186e+01, 2.42313665e+00, 1.89505171e+03,
-            2.12526369e+00, 2.36024193e+01, 6.79663033e+00, 4.66165505e+01]
+    global class_weight
+
     class_weight = [w/sum(class_weight) for w in class_weight]
     score = 0
-    for w, l in zip(class_weight,labels):
+    for w, l in zip(class_weight, labels):
         intersection = K.sum(y_true[..., l] * y_pred[..., l])
         score += w * (2.0 * intersection + smooth) / (K.sum(y_true[..., l]) + K.sum(y_pred[..., l]) + smooth)
-    return score / len(labels)
+    return score / len(class_weight)
 
 
 def dice_coef_loss(y_true, y_pred):
