@@ -203,7 +203,7 @@ if __name__ == '__main__':
 
     model = unet(num_classes)
 
-    adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
+    adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
 
     checkpoint = ModelCheckpoint(data_dir + 'best_segmentation_model.hdf5', monitor='val_loss', verbose=0, save_best_only=True,
                                     save_weights_only=False, mode='auto', period=1)
