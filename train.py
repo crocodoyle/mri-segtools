@@ -20,15 +20,16 @@ modalities = ['FLAIR', 'reg_IR', 'reg_T1']
 img_shape = (240, 240, 48)
 # exclude the background and infarction class
 num_classes = 9
+
 # class_weight = [0.1, 1.73, 28.68, 2.42, 1895.05, 2.12, 23.60, 6.796, 46.616]
-class_weight = [0.01, 1.73, 28.68, 2.42, 100, 2.12, 23.60, 6.796, 46.616]
+class_weight = [0.01, 2, 25, 2, 0.01, 2.12, 5, 2, 2]
 
 def unet(n_tissues):
     """
     3D U-net model, using very small convolutional kernels
     """
 
-    big_conv_size = (5, 5, 5)
+    big_conv_size = (5, 5, 3)
     small_conv_size = (3, 3, 3)
     mini_conv_size = (1, 1, 1)
 
