@@ -106,14 +106,16 @@ def unet(n_tissues):
     conv15 = Conv3D(64, small_conv_size, activation='relu', padding='same', use_bias=True)(drop14)
     drop15 = Dropout(0.6)(conv15)
     # bn15 = BatchNormalization()(drop15)
-    conv16 = Conv3D(48, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop15)
+    conv16 = Conv3D(32, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop15)
+    drop16 = Dropout(0.5)(conv16)
+    conv17 = Conv3D(16, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop16)
 
     # GlobalAveragePooling3D()
-    drop16 = Dropout(0.5)(conv16)
+    drop17 = Dropout(0.5)(conv17)
     # bn17 = BatchNormalization()(drop16)
 
     # need as many output channel as tissue classes
-    conv17 = Conv3D(n_tissues, mini_conv_size, activation='softmax', padding='valid', use_bias=True)(drop16)
+    conv17 = Conv3D(n_tissues, mini_conv_size, activation='softmax', padding='valid', use_bias=True)(drop17)
 
     model = Model(inputs=[inputs], outputs=[conv17])
 
