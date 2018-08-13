@@ -106,7 +106,7 @@ def unet(n_tissues):
     conv15 = Conv3D(64, small_conv_size, activation='relu', padding='same', use_bias=True)(drop14)
     drop15 = Dropout(0.6)(conv15)
     # bn15 = BatchNormalization()(drop15)
-    conv16 = Conv3D(128, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop15)
+    conv16 = Conv3D(64, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop15)
 
     # GlobalAveragePooling3D()
     drop16 = Dropout(0.5)(conv16)
