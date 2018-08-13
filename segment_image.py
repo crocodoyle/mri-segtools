@@ -4,6 +4,8 @@ import argparse
 import nibabel as nib
 import numpy as np
 
+from train import dice_coef, dice_coef_loss
+
 
 def predict_segmentation(input_images_path):
     img_array = np.zeros((1, 240, 240, 48, 3), dtype='float32')
