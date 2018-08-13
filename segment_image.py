@@ -33,7 +33,7 @@ if __name__ == '__main__':
     header = nib.load(data_dir + '1/segm.nii.gz').header
     affine = nib.load(data_dir + '1/segm.nii.gz').get_affine()
 
-    model = load_model(data_dir + 'neuroMTL_segmentation.hdf5')
+    model = load_model(data_dir + 'neuroMTL_segmentation.hdf5', custom_objects={'dice_coef_loss': dice_coef_loss})
 
     for subj_id in subjects:
         predicted_img = predict_segmentation(data_dir + subj_id + '/pre/')
