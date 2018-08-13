@@ -38,7 +38,7 @@ def unet(n_tissues):
     inputs = Input(shape=(img_shape[0], img_shape[1], img_shape[2], len(modalities)))
 
     conv1 = Conv3D(16, big_conv_size, activation='relu', padding='same', use_bias=True)(inputs)
-    conv1 = Conv3D(16, big_conv_size, activation='relu', padding='same', use_bias=True)(conv1)
+    # conv1 = Conv3D(16, big_conv_size, activation='relu', padding='same', use_bias=True)(conv1)
     bn1 = BatchNormalization()(conv1)
     pool1 = MaxPooling3D(pool_size=pool_size)(bn1)
 
@@ -61,11 +61,11 @@ def unet(n_tissues):
     # bn5 = BatchNormalization()(conv5)
     # pool5 = MaxPooling3D(pool_size=pool_size)(bn5)
 
-    conv6 = Conv3D(64, small_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
+    conv6 = Conv3D(32, small_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
     drop6 = Dropout(0.5)(conv6)
-    conv7 = Conv3D(64, small_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
+    conv7 = Conv3D(32, small_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
     drop7 = Dropout(0.5)(conv7)
-    conv8 = Conv3D(64, mini_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
+    conv8 = Conv3D(32, mini_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
     drop8 = Dropout(0.5)(conv8)
     nadir = add([drop6, drop7, drop8])
     # bn8 = BatchNormalization()(nadir)
