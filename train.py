@@ -22,7 +22,7 @@ img_shape = (240, 240, 48)
 num_classes = 9
 
 # class_weight = [0.1, 1.73, 28.68, 2.42, 1895.05, 2.12, 23.60, 6.796, 46.616]
-class_weight = [0.01, 2, 25, 2, 0.01, 2.12, 5, 2, 2]
+class_weight = [0.1, 2, 25, 2, 0.01, 2.12, 5, 2, 2]
 
 def unet(n_tissues):
     """
@@ -106,7 +106,7 @@ def unet(n_tissues):
     conv15 = Conv3D(64, small_conv_size, activation='relu', padding='same', use_bias=True)(drop14)
     drop15 = Dropout(0.6)(conv15)
     # bn15 = BatchNormalization()(drop15)
-    conv16 = Conv3D(16, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop15)
+    conv16 = Conv3D(128, mini_conv_size, activation='relu', padding='same', use_bias=True)(drop15)
 
     # GlobalAveragePooling3D()
     drop16 = Dropout(0.5)(conv16)
