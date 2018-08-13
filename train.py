@@ -29,7 +29,7 @@ def unet(n_tissues):
     3D U-net model, using very small convolutional kernels
     """
 
-    big_conv_size = (5, 5, 3)
+    big_conv_size = (5, 5, 5)
     small_conv_size = (3, 3, 3)
     mini_conv_size = (1, 1, 1)
 
