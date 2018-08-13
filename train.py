@@ -62,12 +62,12 @@ def unet(n_tissues):
     # pool5 = MaxPooling3D(pool_size=pool_size)(bn5)
 
     conv6 = Conv3D(32, small_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
-    drop6 = Dropout(0.5)(conv6)
+    # drop6 = Dropout(0.5)(conv6)
     conv7 = Conv3D(32, small_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
-    drop7 = Dropout(0.5)(conv7)
+    # drop7 = Dropout(0.5)(conv7)
     conv8 = Conv3D(32, mini_conv_size, activation='relu', padding='same', use_bias=True)(pool4)
-    drop8 = Dropout(0.5)(conv8)
-    nadir = add([drop6, drop7, drop8])
+    # drop8 = Dropout(0.5)(conv8)
+    nadir = add([conv6, conv7, conv8])
     # bn8 = BatchNormalization()(nadir)
 
     # skip9 = concatenate([pool5, bn8])
@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     model = unet(num_classes)
 
-    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
+    adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
 
     checkpoint = ModelCheckpoint(data_dir + 'best_segmentation_model.hdf5', monitor='val_loss', verbose=0, save_best_only=True,
                                     save_weights_only=False, mode='auto', period=1)
