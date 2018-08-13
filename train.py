@@ -191,7 +191,7 @@ if __name__ == '__main__':
     class_weight = [0]*num_classes
     for s in range(len(subjects)):
         y = nib.load(data_dir + subjects[s] + '/segm.nii.gz').get_data().ravel()
-        print('labels:', list(set(y)))
+        # print('labels:', list(set(y)))
         class_weight += compute_class_weight('balanced', np.unique(y), y)[:num_classes]
     class_weight /= len(subjects)
 
@@ -203,13 +203,13 @@ if __name__ == '__main__':
 
     model = unet(num_classes)
 
-    adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
+    adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-5)
 
     checkpoint = ModelCheckpoint(data_dir + 'best_segmentation_model.hdf5', monitor='val_loss', verbose=0, save_best_only=True,
                                     save_weights_only=False, mode='auto', period=1)
 
     # model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['categorical_crossentropy', 'accuracy'])
-    model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=[dice_coef,'accuracy'])
+    model.compile(optimizer=adam, loss=dice_coef_loss, metrics=[dice_coef, 'accuracy'])
 
     model.summary()
 
